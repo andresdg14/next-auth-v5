@@ -27,7 +27,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       });
     },
   },
+  // For total security we need to replicate actions from other files into this one
   callbacks: {
+    async signIn({ user, account }) {
+      // Allow OAuth without email verification
+      if (account?.provider !== 'credentials') return true;
+
+      if (!user.id) return false;
+      const existingUser = await getUserById(user.id);
+      // Prevent sign in without email verification
+      if (!existingUser?.emailVerified) return false;
+
+      // TODO: Add 2FA check
+
+      return true;
+    },
+
     // With this we can add the user id to the session, so every placewhere we use session.user.id we can get the user id
     async session({ token, session }) {
       //console.log({ sessionToken: token });
