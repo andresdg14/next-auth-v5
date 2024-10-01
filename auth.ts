@@ -33,9 +33,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Allow OAuth without email verification
       if (account?.provider !== 'credentials') return true;
 
-      if (!user.id) return false;
-      const existingUser = await getUserById(user.id);
       // Prevent sign in without email verification
+      const existingUser = await getUserById(user.id as string);
       if (!existingUser?.emailVerified) return false;
 
       // TODO: Add 2FA check
@@ -45,7 +44,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     // With this we can add the user id to the session, so every placewhere we use session.user.id we can get the user id
     async session({ token, session }) {
-      //console.log({ sessionToken: token });
       if (token.sub && session.user) {
         session.user.id = token.sub;
       }
@@ -62,7 +60,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (!existingUser) return token;
       token.role = existingUser.role;
 
-      //console.log(token);
       return token;
     },
   },
